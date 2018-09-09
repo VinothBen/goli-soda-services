@@ -7,7 +7,7 @@ var secret = require('../config').secret;
 var InHouseDataSchema = new mongoose.Schema({
     inHouseData: [
         {
-            s_no: String,
+            id: Number,
             date: String,
             day: String,
             bottle_type: String,
