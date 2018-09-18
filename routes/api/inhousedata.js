@@ -2,11 +2,13 @@ var mongoose = require('mongoose');
 var router = require('express').Router();
 var passport = require('passport');
 var InHouseData = mongoose.model('in-house');
+// var _ = require('lodash');
 // var auth = require('../auth');
 
 router.get('/inhouse-getdata', function (req, res, next) {
     // InHouseData.find("5b5da4d3e7179a07334161d4").select({ inHouseData: { $elemMatch: { date: req.headers.date } } }).limit(10).then(function (user) {
-    InHouseData.find("5b5da4d3e7179a07334161d4").limit(10).then(function (user) {
+    // InHouseData.find("5b5da4d3e7179a07334161d4").limit(10).then(function (user) {
+    InHouseData.find({ "_id": "5b5da4d3e7179a07334161d4" }).then(function (user) {
         if (!user) {
             res.status(401);
             res.json({
@@ -26,7 +28,7 @@ router.post('/inhouse-savedata', function (req, res, next) {
         var errMessage = null;
         req.body.inhousedata.map((obj) => {
             InHouseData.findByIdAndUpdate(
-                '5b5da4d3e7179a07334161d4',
+                { "_id": "5b5da4d3e7179a07334161d4" },
                 { $push: { "inHouseData": obj } },
                 { safe: true, upsert: true },
                 function (err, model) {
@@ -47,6 +49,35 @@ router.post('/inhouse-savedata', function (req, res, next) {
             message: "Data Saved Successfully!"
         });
     }
+});
+
+router.get('/download-search', function (req, res, next) {
+    var date = req.query.date.toString();
+    InHouseData.aggregate([
+        { "$match": { "inHouseData.date": date } },
+        {
+            "$redact": {
+                "$cond": [
+                    { "$eq": [{ "$ifNull": ["$date", date] }, date] },
+                    "$$DESCEND",
+                    "$$PRUNE"
+                ]
+            }
+        }
+    ], function (err, response) {
+        if (!err && response.length !==0) {
+            return res.json(response);
+        }
+        else if (response) {
+            res.status(200).json({
+                message: "No data found on this Date."
+            });
+        } else {
+            res.status(400).json({
+                message: err
+            });
+        }
+    })
 });
 
 module.exports = router;
