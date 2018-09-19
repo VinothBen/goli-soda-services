@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var router = require('express').Router();
 var passport = require('passport');
 var InHouseData = mongoose.model('in-house');
-// var _ = require('lodash');
+var _ = require('lodash');
 // var auth = require('../auth');
 
 router.get('/inhouse-getdata', function (req, res, next) {
@@ -24,7 +24,7 @@ router.get('/inhouse-getdata', function (req, res, next) {
 });
 
 router.post('/inhouse-savedata', function (req, res, next) {
-    if (req.body && req.body.inhousedata) {
+    if (!_.isEmpty(req.body) && !_.isEmpty(req.body.inhousedata)) {
         var errMessage = null;
         req.body.inhousedata.map((obj) => {
             InHouseData.findByIdAndUpdate(
@@ -52,32 +52,87 @@ router.post('/inhouse-savedata', function (req, res, next) {
 });
 
 router.get('/download-search', function (req, res, next) {
-    var date = req.query.date.toString();
-    InHouseData.aggregate([
-        { "$match": { "inHouseData.date": date } },
-        {
-            "$redact": {
-                "$cond": [
-                    { "$eq": [{ "$ifNull": ["$date", date] }, date] },
-                    "$$DESCEND",
-                    "$$PRUNE"
-                ]
+    if (!_.isEmpty(req.query) && req.query.date) {
+        var date = req.query.date.toString();
+        InHouseData.aggregate([
+            { "$match": { "inHouseData.date": date } },
+            {
+                "$redact": {
+                    "$cond": [
+                        {
+                            "$eq": [{ "$ifNull": ["$date", date] },
+                                date]
+                        },
+                        "$$DESCEND",
+                        "$$PRUNE"
+                    ]
+                }
             }
-        }
-    ], function (err, response) {
-        if (!err && response.length !==0) {
-            return res.json(response);
-        }
-        else if (response) {
-            res.status(200).json({
-                message: "No data found on this Date."
+        ], function (err, response) {
+            if (!err && response.length !== 0) {
+                return res.json(response);
+            }
+            else if (!err && response.length === 0) {
+                res.status(200).json({
+                    message: "No data found on this Date."
+                });
+            } else {
+                res.status(400).json({
+                    message: err
+                });
+            }
+        });
+    } else {
+        res.status(400).json({
+            message: "No data found."
+        });
+    }
+});
+
+router.get('/download-search-MDates', function (req, res, next) {
+    if (!_.isEmpty(req.query)) {
+        var dateValueKeys = Object.keys(req.query);
+        var queryStructure = [];
+        if (!_.isEmpty(dateValueKeys)) {
+            dateValueKeys.map(function (obj) {
+                var newObj = { "$eq": [{ "$ifNull": ["$date", req.query[obj].toString()] }, req.query[obj].toString()] };
+                queryStructure.push(newObj);
             });
-        } else {
-            res.status(400).json({
-                message: err
+        }
+        if (!_.isEmpty(queryStructure)) {
+            InHouseData.aggregate([
+                {
+                    "$redact": {
+                        "$cond": [
+                            {
+                                "$or": queryStructure
+                            },
+                            "$$DESCEND",
+                            "$$PRUNE"
+                        ]
+                    }
+                }
+            ], function (err, response) {
+                if (!err && response.length !== 0) {
+                    return res.json(response);
+                }
+                else if (!err && response.length === 0) {
+                    res.status(200).json({
+                        message: "No data found on this Date."
+                    });
+                } else {
+                    res.status(400).json({
+                        message: err
+                    });
+                }
             });
         }
-    })
+
+    } else {
+        res.status(400).json({
+            message: "No data found."
+        });
+    }
 });
 
 module.exports = router;
