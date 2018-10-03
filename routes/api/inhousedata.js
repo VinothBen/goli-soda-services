@@ -3,9 +3,10 @@ var router = require('express').Router();
 var passport = require('passport');
 var InHouseData = mongoose.model('in-house');
 var _ = require('lodash');
+var auth = require('../auth');
 // var auth = require('../auth');
 
-router.get('/inhouse-getdata', function (req, res, next) {
+router.get('/inhouse-getdata', auth.required, function (req, res, next) {
     // InHouseData.find("5b5da4d3e7179a07334161d4").select({ inHouseData: { $elemMatch: { date: req.headers.date } } }).limit(10).then(function (user) {
     // InHouseData.find("5b5da4d3e7179a07334161d4").limit(10).then(function (user) {
     InHouseData.find({ "_id": "5b5da4d3e7179a07334161d4" }).then(function (user) {
@@ -23,7 +24,7 @@ router.get('/inhouse-getdata', function (req, res, next) {
     }).catch(next);
 });
 
-router.post('/inhouse-savedata', function (req, res, next) {
+router.post('/inhouse-savedata', auth.required, function (req, res, next) {
     if (!_.isEmpty(req.body) && !_.isEmpty(req.body.inhousedata)) {
         var errMessage = null;
         req.body.inhousedata.map((obj) => {
@@ -51,7 +52,7 @@ router.post('/inhouse-savedata', function (req, res, next) {
     }
 });
 
-router.get('/download-search', function (req, res, next) {
+router.get('/download-search', auth.required, function (req, res, next) {
     if (!_.isEmpty(req.query) && req.query.date) {
         var date = req.query.date.toString();
         InHouseData.aggregate([
@@ -89,7 +90,7 @@ router.get('/download-search', function (req, res, next) {
     }
 });
 
-router.get('/download-search-MDates', function (req, res, next) {
+router.get('/download-search-MDates', auth.required, function (req, res, next) {
     if (!_.isEmpty(req.query)) {
         var dateValueKeys = Object.keys(req.query);
         var queryStructure = [];

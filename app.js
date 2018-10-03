@@ -55,13 +55,16 @@ if (isProduction) {
 }
 
 require('./models/InHouseData');
+require('./models/Users');
 // require('./models/User');
 // require('./models/Article');
 // require('./models/Comment');
 // require('./config/passport');
-
 app.use(require('./routes'));
 
+app.use(passport.initialize());
+app.use(passport.session());
+require('./config/passport');
 /// catch 404 and forward to error handler
 app.use(function (req, res, next) {
   var err = new Error('URL Not Found!');
