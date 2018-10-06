@@ -29,7 +29,7 @@ router.post('/inhouse-savedata', auth.required, function (req, res, next) {
         var errMessage = null;
         InHouseData.findOneAndUpdate({ "_id": "5b5da4d3e7179a07334161d4" },
             {
-                $push: { "inHouseData": req.body.inhousedata[0] },
+                $push: { "inHouseData": { $each: req.body.inhousedata } },
                 function(err, model) {
                     if (err) {
                         errMessage = {
@@ -39,10 +39,10 @@ router.post('/inhouse-savedata', auth.required, function (req, res, next) {
                     }
                 }
             })
-    //    InHouseData.aggregate([
-    //         { $project: { inHouseData: { $concatArrays: [ "$inHouseData", req.body.inhousedata ] } } }
-    //      ])
-         .then(function (err) {
+            //    InHouseData.aggregate([
+            //         { $project: { inHouseData: { $concatArrays: [ "$inHouseData", req.body.inhousedata ] } } }
+            //      ])
+            .then(function (err) {
                 if (!_.isEmpty(errMessage) || !err) {
                     res.status(400);
                     res.json({
@@ -70,6 +70,7 @@ router.post('/inhouse-savedata', auth.required, function (req, res, next) {
 //             InHouseData.findOneAndUpdate(
 //                 { "_id": "5b5da4d3e7179a07334161d4" },
 //                 { $push: { "inHouseData": obj } },
+// {safe: true, upsert: true},
 //                 function (err, model) {
 //                     if (err) {
 //                         errMessage = {
