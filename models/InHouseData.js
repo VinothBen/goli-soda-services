@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var uniqueValidator = require('mongoose-unique-validator');
+// var uniqueValidator = require('mongoose-unique-validator');
 var crypto = require('crypto');
 var jwt = require('jsonwebtoken');
 var secret = require('../config').secret;
@@ -7,7 +7,7 @@ var secret = require('../config').secret;
 var InHouseDataSchema = new mongoose.Schema({
     inHouseData: [
         {
-            id: {type: Number, unique: true, required: [true, "id can't be blank"], index: true},
+            id: Number,
             date: String,
             day: String,
             bottle_type: String,
@@ -20,7 +20,7 @@ var InHouseDataSchema = new mongoose.Schema({
     ]
 }, { timestamps: true, collection: 'in-house', _id: false });
 
-InHouseDataSchema.plugin(uniqueValidator, { message: 'Dublicate id found.' });
+// InHouseDataSchema.plugin(uniqueValidator, { message: 'Dublicate id found.' });
 
 InHouseDataSchema.methods.generateJWT = function () {
     var today = new Date();

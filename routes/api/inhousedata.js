@@ -14,8 +14,8 @@ router.get('/inhouse-getdata', auth.required, function (req, res, next) {
             res.status(401);
             res.json({
                 'Connection': {
-                    message: "DB Connection Failed!",
-                    error: "Error occured while fetching data!"
+                    message: "DB Connection Failed.",
+                    error: "Error occured while fetching data."
                 }
             });
             return res;
@@ -27,29 +27,73 @@ router.get('/inhouse-getdata', auth.required, function (req, res, next) {
 router.post('/inhouse-savedata', auth.required, function (req, res, next) {
     if (!_.isEmpty(req.body) && !_.isEmpty(req.body.inhousedata)) {
         var errMessage = null;
-        req.body.inhousedata.map((obj) => {
-            InHouseData.findOneAndUpdate(
-                { "_id": "5b5da4d3e7179a07334161d4" },
-                { $push: { "inHouseData": obj } },
-                function (err, model) {
+        InHouseData.findOneAndUpdate({ "_id": "5b5da4d3e7179a07334161d4" },
+            {
+                $push: { "inHouseData": req.body.inhousedata[0] },
+                function(err, model) {
                     if (err) {
                         errMessage = {
-                            message: "Save Failed!",
+                            message: "Save Failed.",
                             error: err
                         };
                     }
                 }
-            );
-        })
-    }
-    if (errMessage) {
-        return res.status(400).json(errMessage);
+            })
+    //    InHouseData.aggregate([
+    //         { $project: { inHouseData: { $concatArrays: [ "$inHouseData", req.body.inhousedata ] } } }
+    //      ])
+         .then(function (err) {
+                if (!_.isEmpty(errMessage) || !err) {
+                    res.status(400);
+                    res.json({
+                        'Connection': {
+                            message: "Save failed.",
+                            error: "Error occured while saving data."
+                        }
+                    });
+                    return res;
+                } else {
+                    return res.status(200).json({ message: "Saved Successfully." });
+                }
+            }).catch(next);
     } else {
-        return res.status(200).json({
-            message: "Data Saved Successfully!"
+        return res.status(500).json({
+            message: "No data available."
         });
     }
 });
+
+// router.post('/inhouse-savedata', auth.required, function (req, res, next) {
+//     if (!_.isEmpty(req.body) && !_.isEmpty(req.body.inhousedata)) {
+//         var errMessage = null;
+//         req.body.inhousedata.map((obj) => {
+//             InHouseData.findOneAndUpdate(
+//                 { "_id": "5b5da4d3e7179a07334161d4" },
+//                 { $push: { "inHouseData": obj } },
+//                 function (err, model) {
+//                     if (err) {
+//                         errMessage = {
+//                             message: "Save Failed.",
+//                             error: err
+//                         };
+//                     }
+//                 }
+//             );
+//         });
+//         if (errMessage) {
+//             return res.status(400).json(errMessage);
+//         } else {
+//             return res.status(200).json({
+//                 message: "Data Saved Successfully."
+//             });
+//         }
+//     } else {
+//         return res.status(500).json({
+//             message: "No data available."
+//         });
+//     }
+
+// });
 
 router.get('/download-search', auth.required, function (req, res, next) {
     if (!_.isEmpty(req.query) && req.query.date) {
