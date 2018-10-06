@@ -26,20 +26,21 @@ UsersSchema.methods.setPassword = function (password) {
 };
 
 UsersSchema.methods.generateJWT = function () {
-    var today = new Date();
-    var exp = new Date(today);
-    exp.setDate(today.getDate() + 60);
+    // var today = new Date();
+    // var exp = new Date(today);
+    // exp.setMinutes(today.getMinutes() + 60);
     return jwt.sign({
         id: this._id,
         username: this.username,
-        exp: parseInt(exp.getTime() / 1000),
-    }, secret);
+    }, secret, {expiresIn: '1h'});
 };
 
 UsersSchema.methods.toAuthJSON = function () {
     return {
         username: this.username,
-        email: this.email,
+        email: this.emailid,
+        lastlogindate: this.lastlogindate,
+        lastsaveddate: this.lastsaveddate,
         token: this.generateJWT(),
     };
 };
