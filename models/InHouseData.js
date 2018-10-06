@@ -7,7 +7,7 @@ var secret = require('../config').secret;
 var InHouseDataSchema = new mongoose.Schema({
     inHouseData: [
         {
-            id: Number,
+            id: {type: Number, unique: true, required: [true, "id can't be blank"], index: true},
             date: String,
             day: String,
             bottle_type: String,
@@ -20,7 +20,7 @@ var InHouseDataSchema = new mongoose.Schema({
     ]
 }, { timestamps: true, collection: 'in-house', _id: false });
 
-InHouseDataSchema.plugin(uniqueValidator, { message: 'is already taken.' });
+InHouseDataSchema.plugin(uniqueValidator, { message: 'Dublicate id found.' });
 
 InHouseDataSchema.methods.generateJWT = function () {
     var today = new Date();
@@ -38,9 +38,7 @@ InHouseDataSchema.methods.toAuthJSON = function () {
     return {
         username: this.username,
         email: this.email,
-        token: this.generateJWT(),
-        bio: this.bio,
-        image: this.image
+        token: this.generateJWT()
     };
 };
 mongoose.model('in-house', InHouseDataSchema);

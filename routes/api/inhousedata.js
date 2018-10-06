@@ -28,10 +28,9 @@ router.post('/inhouse-savedata', auth.required, function (req, res, next) {
     if (!_.isEmpty(req.body) && !_.isEmpty(req.body.inhousedata)) {
         var errMessage = null;
         req.body.inhousedata.map((obj) => {
-            InHouseData.findByIdAndUpdate(
+            InHouseData.findOneAndUpdate(
                 { "_id": "5b5da4d3e7179a07334161d4" },
                 { $push: { "inHouseData": obj } },
-                { safe: true, upsert: true },
                 function (err, model) {
                     if (err) {
                         errMessage = {
