@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var router = require('express').Router();
 var passport = require('passport');
 var InHouseData = mongoose.model('in-house');
+var SupplyData = mongoose.model('supply');
 var _ = require('lodash');
 var auth = require('../auth');
 // var auth = require('../auth');
@@ -10,6 +11,22 @@ router.get('/inhouse-getdata', auth.required, function (req, res, next) {
     // InHouseData.find("5b5da4d3e7179a07334161d4").select({ inHouseData: { $elemMatch: { date: req.headers.date } } }).limit(10).then(function (user) {
     // InHouseData.find("5b5da4d3e7179a07334161d4").limit(10).then(function (user) {
     InHouseData.find({ "_id": "5b5da4d3e7179a07334161d4" }).then(function (user) {
+        if (!user) {
+            res.status(401);
+            res.json({
+                'Connection': {
+                    message: "DB Connection Failed.",
+                    error: "Error occured while fetching data."
+                }
+            });
+            return res;
+        }
+        return res.json(user);
+    }).catch(next);
+});
+
+router.get('/getSupplyData', function (req, res, next) {
+    SupplyData.find({ "_id": "5bcc4b7bfb6fc060274a32ca" }).then(function (user) {
         if (!user) {
             res.status(401);
             res.json({
