@@ -5,7 +5,7 @@ var InHouseData = mongoose.model('in-house');
 var SupplyData = mongoose.model('supply');
 var _ = require('lodash');
 var auth = require('../auth');
-// var auth = require('../auth');
+var moment = require('moment');
 
 router.get('/inhouse-getdata', auth.required, function (req, res, next) {
     // InHouseData.find("5b5da4d3e7179a07334161d4").select({ inHouseData: { $elemMatch: { date: req.headers.date } } }).limit(10).then(function (user) {
@@ -153,15 +153,33 @@ router.get('/download-search', auth.required, function (req, res, next) {
 
 router.get('/download-search-MDates', auth.required, function (req, res, next) {
     if (!_.isEmpty(req.query)) {
-        var dateValueKeys = Object.keys(req.query);
+        // var dateValueKeys = Object.keys(req.query);
+        // var queryStructure = [];
+        // if (!_.isEmpty(dateValueKeys)) {
+        //     dateValueKeys.map(function (obj) {
+        //         var newObj = { "$eq": [{ "$ifNull": ["$date", req.query[obj].toString()] }, req.query[obj].toString()] };
+        //         queryStructure.push(newObj);
+        //     });
+        // }
+        var dateArray = [];
         var queryStructure = [];
-        if (!_.isEmpty(dateValueKeys)) {
-            dateValueKeys.map(function (obj) {
-                var newObj = { "$eq": [{ "$ifNull": ["$date", req.query[obj].toString()] }, req.query[obj].toString()] };
-                queryStructure.push(newObj);
+        try {
+            var startDate = _.cloneDeep(moment(req.query.start));
+            var endDate = moment(req.query.end);
+            while (startDate <= endDate) {
+                dateArray.push(startDate.format("MM-DD-YY"));
+                startDate = moment(startDate).add('1', "days");
+            }
+        } catch (error) {
+            res.status(400).json({
+                message: error.message
             });
         }
-        if (!_.isEmpty(queryStructure)) {
+        if (!_.isEmpty(dateArray)) {
+            dateArray.map(function (obj) {
+                var newObj = { "$eq": [{ "$ifNull": ["$date", obj] }, obj] };
+                queryStructure.push(newObj);
+            });
             InHouseData.aggregate([
                 {
                     "$redact": {
@@ -175,7 +193,7 @@ router.get('/download-search-MDates', auth.required, function (req, res, next) {
                     }
                 }
             ], function (err, response) {
-                if (!err && response.length !== 0) {
+                if (!err && !_.isEmpty(response) && !_.isEmpty(response[0].inHouseData)) {
                     return res.json(response);
                 }
                 else if (!err && response.length === 0) {
@@ -183,8 +201,8 @@ router.get('/download-search-MDates', auth.required, function (req, res, next) {
                         message: "No data found on this Date."
                     });
                 } else {
-                    res.status(400).json({
-                        message: err
+                    res.status(200).json({
+                        message: "No data found on this Date."
                     });
                 }
             });
@@ -192,7 +210,7 @@ router.get('/download-search-MDates', auth.required, function (req, res, next) {
 
     } else {
         res.status(400).json({
-            message: "No data found."
+            message: "Something went wrong please try again."
         });
     }
 });
