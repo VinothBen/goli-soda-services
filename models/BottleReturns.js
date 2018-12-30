@@ -4,27 +4,24 @@ var mongoose = require('mongoose');
 // var jwt = require('jsonwebtoken');
 // var secret = require('../config').secret;
 
-var SupplyDataSchema = new mongoose.Schema({
-    supplyData: [
+var BottleReturnsDataSchema = new mongoose.Schema({
+    BottleReturnsData: [
         {
             id: String,
             date: String,
             day: String,
-            bottle_type: String,
-            total_bottles: String,
-            type_of_supply: String,
             area: String,
-            type_of_vehicle: String,
-            fuel_cost: String,
-            employee_wage: String,
-            delivery_expense: String
+            bottle_type: String,
+            empty_bottles_count: String,
+            delivered_bottles: String,
+            return_bottles: String
         }
     ]
-}, { timestamps: true, collection: 'supply', _id: false });
+}, { timestamps: true, collection: 'bottle-returns', _id: false });
 
-// SupplyDataSchema.plugin(uniqueValidator, { message: 'Dublicate id found.' });
+// BottleReturnsDataSchema.plugin(uniqueValidator, { message: 'Dublicate id found.' });
 
-// SupplyDataSchema.methods.generateJWT = function () {
+// BottleReturnsDataSchema.methods.generateJWT = function () {
 //     var today = new Date();
 //     var exp = new Date(today);
 //     exp.setDate(today.getDate() + 60);
@@ -36,11 +33,11 @@ var SupplyDataSchema = new mongoose.Schema({
 //     }, secret);
 // };
 
-// SupplyDataSchema.methods.toAuthJSON = function () {
+// BottleReturnsDataSchema.methods.toAuthJSON = function () {
 //     return {
 //         username: this.username,
 //         email: this.email,
 //         token: this.generateJWT()
 //     };
 // };
-mongoose.model('supply', SupplyDataSchema);
+mongoose.model('bottle-returns', BottleReturnsDataSchema);

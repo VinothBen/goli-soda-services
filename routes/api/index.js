@@ -6,6 +6,8 @@ var router = require('express').Router();
 // router.use('/tags', require('./tags'));
 router.use('/', require('./userdetails'));
 router.use('/', require('./inhousedata'));
+router.use('/', require('./supplyData'));
+router.use('/', require('./bottleReturnsData'));
 
 
 router.use(function(err, req, res, next){

@@ -57,6 +57,7 @@ if (isProduction) {
 require('./models/InHouseData');
 require('./models/Users');
 require('./models/SupplyData');
+require('./models/BottleReturns');
 // require('./models/User');
 // require('./models/Article');
 // require('./models/Comment');

@@ -3,12 +3,15 @@ var uniqueValidator = require("mongoose-unique-validator");
 var crypto = require("crypto");
 var jwt = require("jsonwebtoken");
 var secret = require("../config").secret;
+var moment = require("moment");
 
 var UsersSchema = new mongoose.Schema({
     username: {type: String, lowercase: true, unique: true, required: [true, "username can't be blank"], index: true},
     emailid: {type: String, lowercase: true, unique: true, required: [true, "emailid can't be blank"], index: true},
-    lastsaveddate: String,
-    lastlogindate: String,
+    lastSavedDateForInhouse: String,
+    lastSavedDateForSupply: String,
+    lastSavedDateForBottleReturns: String,
+    lastLogindDate: String,
     hash: String,
     salt: String
 }, { timestamps: true, collection: "user-details", _id: true });
@@ -39,8 +42,10 @@ UsersSchema.methods.toAuthJSON = function () {
     return {
         username: this.username,
         email: this.emailid,
-        lastlogindate: this.lastlogindate,
-        lastsaveddate: this.lastsaveddate,
+        lastSavedDateForInhouse: this.lastSavedDateForInhouse,
+        lastSavedDateForSupply: this.lastSavedDateForSupply,
+        lastSavedDateForBottleReturns: this.lastSavedDateForBottleReturns,
+        lastLogindDate: moment().format("MM-DD-YY"),
         token: this.generateJWT(),
     };
 };
