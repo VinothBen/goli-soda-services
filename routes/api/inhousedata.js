@@ -27,6 +27,10 @@ var UserModel = mongoose.model("Users");
 router.post('/inhouse-savedata', auth.required, function (req, res, next) {
     if (!_.isEmpty(req.body) && !_.isEmpty(req.body.inhousedata)) {
         var errMessage = null;
+        var dateValues = [];
+        req.body.inhousedata.map(function (obj) {
+                dateValues.push(moment(obj.date));
+        });
         InHouseData.findOneAndUpdate({ "_id": "5b5da4d3e7179a07334161d4" },
             {
                 $push: { "inHouseData": { $each: req.body.inhousedata } },
@@ -53,14 +57,14 @@ router.post('/inhouse-savedata', auth.required, function (req, res, next) {
                     });
                     return res;
                 } else {
-                    if(req.body.username){
+                    if (req.body.username) {
                         var errorDate = {};
                         UserModel.findOneAndUpdate({ "username": req.body.username },
-                        { $set: { "lastSavedDateForInhouse": moment().format("MM-DD-YY") } }).then(
-                            () => {
-                                errorDate.message = "Last save date success."
-                            }
-                        ).catch(() => { errorDate.message = "Last save date failed." });
+                            { $set: { "lastSavedDateForInhouse": moment.max(dateValues).format("MM-DD-YY") } }).then(
+                                () => {
+                                    errorDate.message = "Last save date success."
+                                }
+                            ).catch(() => { errorDate.message = "Last save date failed." });
                         return res.status(200).json({ message: "Saved Successfully.", errorDate });
                     }
                 }

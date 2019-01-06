@@ -64,6 +64,10 @@ router.get('/getBottleReturnsData', function (req, res, next) {
 router.post('/bottleReturns-saveData', auth.required, function (req, res, next) {
     if (!_.isEmpty(req.body) && !_.isEmpty(req.body.bottleReturnsData)) {
         var errMessage = null;
+        var dateValues = [];
+        req.body.bottleReturnsData.map(function (obj) {
+                dateValues.push(moment(obj.date));
+        });
         BottleReturnsData.findOneAndUpdate({ "_id": "5c271f0dfb6fc00eee882906" },
             {
                 $push: { "BottleReturnsData": { $each: req.body.bottleReturnsData } },
@@ -93,7 +97,7 @@ router.post('/bottleReturns-saveData', auth.required, function (req, res, next) 
                     if (req.body.username) {
                         var errorDate = {};
                         UserModel.findOneAndUpdate({ "username": req.body.username },
-                            { $set: { "lastSavedDateForBottleReturns": moment().format("MM-DD-YY") } }).then(
+                            { $set: { "lastSavedDateForBottleReturns": moment.max(dateValues).format("MM-DD-YY") } }).then(
                                 () => {
                                     errorDate.message = "Last save date success."
                                 }

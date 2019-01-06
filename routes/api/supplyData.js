@@ -64,6 +64,10 @@ router.get('/getSupplyData', function (req, res, next) {
 router.post('/supply-saveData', function (req, res, next) {
     if (!_.isEmpty(req.body) && !_.isEmpty(req.body.supplyData)) {
         var errMessage = null;
+        var dateValues = [];
+        req.body.supplyData.map(function (obj) {
+                dateValues.push(moment(obj.date));
+        });
         SupplyData.findOneAndUpdate({ "_id": "5bcc4b7bfb6fc060274a32ca" },
             {
                 $push: { "supplyData": { $each: req.body.supplyData } },
@@ -93,7 +97,7 @@ router.post('/supply-saveData', function (req, res, next) {
                     if (req.body.username) {
                         var errorDate = {};
                         UserModel.findOneAndUpdate({ "username": req.body.username },
-                            { $set: { "lastSavedDateForSupply": moment().format("MM-DD-YY") } }).then(
+                            { $set: { "lastSavedDateForSupply": moment.max(dateValues).format("MM-DD-YY") } }).then(
                                 () => {
                                     errorDate.message = "Last save date success."
                                 }

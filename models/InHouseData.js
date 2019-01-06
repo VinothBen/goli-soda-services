@@ -15,7 +15,8 @@ var InHouseDataSchema = new mongoose.Schema({
             no_of_bottles: String,
             employee_involved: String,
             employee_cost: String,
-            bottle_for_cost: String
+            bottle_for_cost: String,
+            temperature: String
         }
     ]
 }, { timestamps: true, collection: 'in-house', _id: false });
